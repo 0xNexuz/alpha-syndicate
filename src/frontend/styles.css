@@ -116,9 +116,13 @@ main {
 .hero-grid,
 .trust-strip,
 .architecture-section,
+.judge-section,
+.market-section,
+.policy-section,
 .console-section,
 .settlement-section,
-.wallet-section {
+.wallet-section,
+.economics-section {
   width: min(1180px, calc(100vw - 40px));
   margin: 0 auto;
   position: relative;
@@ -415,18 +419,174 @@ h3 {
 }
 
 .architecture-section,
+.judge-section,
+.market-section,
+.policy-section,
 .console-section,
 .settlement-section,
-.wallet-section {
+.wallet-section,
+.economics-section {
   color: #111412;
   padding: 96px 0;
 }
 
 .architecture-section .eyebrow,
+.judge-section .eyebrow,
+.market-section .eyebrow,
+.policy-section .eyebrow,
 .console-section .eyebrow,
 .settlement-section .eyebrow,
-.wallet-section .eyebrow {
+.wallet-section .eyebrow,
+.economics-section .eyebrow {
   color: #24654a;
+}
+
+.judge-section,
+.market-section,
+.policy-section,
+.economics-section {
+  display: grid;
+  grid-template-columns: 1fr 0.75fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.judge-copy p,
+.research-card p {
+  color: rgba(17, 20, 18, 0.72);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.mode-card,
+.policy-card,
+.research-card {
+  padding: 28px;
+  border-radius: 8px;
+  background: #111412;
+  color: #f4f0e8;
+  box-shadow: 0 26px 70px rgba(17, 20, 18, 0.14);
+}
+
+.mode-card span,
+.metrics-strip span,
+.policy-grid span,
+.market-table span {
+  color: rgba(244, 240, 232, 0.58);
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.mode-card strong {
+  display: block;
+  margin: 12px 0;
+  color: #b6ffd1;
+  font-size: 32px;
+}
+
+.flow-map {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.flow-map div {
+  min-height: 72px;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(17, 20, 18, 0.12);
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.flow-map span {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: rgba(17, 20, 18, 0.22);
+}
+
+.flow-map .active {
+  background: #111412;
+  color: #f4f0e8;
+}
+
+.flow-map .active span {
+  background: #b6ffd1;
+  box-shadow: 0 0 0 6px rgba(182, 255, 209, 0.1);
+}
+
+.market-table {
+  display: grid;
+  gap: 8px;
+}
+
+.market-table div {
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr 0.6fr 0.7fr;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(17, 20, 18, 0.12);
+}
+
+.market-table .selected {
+  background: #111412;
+  color: #f4f0e8;
+}
+
+.market-table .selected strong {
+  color: #b6ffd1;
+}
+
+.policy-section {
+  grid-template-columns: 1fr 0.8fr;
+}
+
+.policy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.policy-grid div {
+  padding: 14px;
+  border-radius: 6px;
+  background: rgba(244, 240, 232, 0.06);
+  border: 1px solid rgba(244, 240, 232, 0.1);
+}
+
+.policy-grid strong {
+  display: block;
+  margin-top: 6px;
+  color: #b6ffd1;
+}
+
+.research-card {
+  background: rgba(255, 255, 255, 0.76);
+  color: #111412;
+}
+
+.research-card .eyebrow,
+.research-card p {
+  color: rgba(17, 20, 18, 0.72);
+}
+
+.research-card div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: #24654a;
+  font-weight: 800;
 }
 
 .section-heading {
@@ -512,6 +672,32 @@ h3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+.economics-section {
+  padding-top: 20px;
+  grid-template-columns: 0.8fr 1fr;
+}
+
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.metrics-strip div {
+  min-height: 132px;
+  padding: 18px;
+  border-radius: 8px;
+  background: #111412;
+  color: #f4f0e8;
+}
+
+.metrics-strip strong {
+  display: block;
+  margin-top: 22px;
+  color: #b6ffd1;
+  font-size: 24px;
 }
 
 .artifact-grid div {
@@ -710,9 +896,13 @@ dd {
 
   .hero-grid,
   .section-heading,
+  .judge-section,
+  .market-section,
+  .policy-section,
   .console-section,
   .settlement-section,
-  .wallet-section {
+  .wallet-section,
+  .economics-section {
     grid-template-columns: 1fr;
   }
 
@@ -726,7 +916,9 @@ dd {
 
   .trust-strip,
   .bento-grid,
-  .wallet-grid {
+  .wallet-grid,
+  .flow-map,
+  .metrics-strip {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -743,7 +935,11 @@ dd {
   .trust-strip,
   .bento-grid,
   .wallet-grid,
-  .artifact-grid {
+  .artifact-grid,
+  .flow-map,
+  .policy-grid,
+  .metrics-strip,
+  .market-table div {
     grid-template-columns: 1fr;
   }
 

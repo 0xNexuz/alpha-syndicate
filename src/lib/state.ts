@@ -62,6 +62,17 @@ export const agents = new Map<string, AgentIdentity>([
       walletId: "wallet-exec-arc",
       privacySharedSecret: "alpha-syndicate-shared-secret"
     }
+  ],
+  [
+    "execution-agent-unverified",
+    {
+      id: "execution-agent-unverified",
+      type: "execution",
+      kybStatus: "rejected",
+      riskScore: 82,
+      walletId: "wallet-exec-arc",
+      privacySharedSecret: "unverified-agent-secret"
+    }
   ]
 ]);
 

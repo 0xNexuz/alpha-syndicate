@@ -5,6 +5,7 @@ import {
   Blocks,
   Bot,
   CircleDollarSign,
+  FileSearch,
   EyeOff,
   KeyRound,
   LockKeyhole,
@@ -14,6 +15,7 @@ import {
   ReceiptText,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   WalletCards,
   Zap
 } from "lucide-react";
@@ -74,6 +76,21 @@ const initialLogs: LogEntry[] = [
 ];
 
 const gatewayBaseUrl = import.meta.env.VITE_GATEWAY_URL ?? "";
+const architectureNodes = ["Compliance", "x402 invoice", "CCTP refill", "Funding", "Paymaster", "Settlement", "Oracle unlock"];
+const policyRules = [
+  ["Max spend", "0.50 USDC"],
+  ["Allowed assets", "USDC, EURC"],
+  ["Markets", "BTC, ETH, SOL"],
+  ["Min conviction", "0.75"],
+  ["KYB required", "true"],
+  ["Privacy", "optional"]
+];
+const oracleMarket = [
+  ["Momentum Oracle", "0.25 USDC", "0.87", "220ms"],
+  ["Volatility Oracle", "0.18 USDC", "0.73", "310ms"],
+  ["Funding Oracle", "0.12 USDC", "0.69", "180ms"],
+  ["Canteen Alpha Oracle", "0.35 USDC", "0.91", "420ms"]
+];
 
 function App() {
   useScrollReveal();
@@ -83,6 +100,7 @@ function App() {
   const [signal, setSignal] = useState<Record<string, unknown> | null>(null);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [privacyMode, setPrivacyMode] = useState(false);
+  const [activeDemo, setActiveDemo] = useState("ready");
 
   const statusCounts = useMemo(() => ({
     live: logs.filter((log) => log.status === "live").length,
@@ -91,6 +109,7 @@ function App() {
 
   async function runPaymentFlow() {
     setIsRunning(true);
+    setActiveDemo("running");
     setSignal(null);
     setRunResult(null);
     setLogs([
@@ -116,8 +135,30 @@ function App() {
           pushLog(entry.step, entry.detail, entry.status);
         }, index * 180);
       }
+      setActiveDemo("complete");
     } catch (error) {
       pushLog("Error", error instanceof Error ? error.message : "Unknown failure", "warn");
+      setActiveDemo("error");
+    } finally {
+      setIsRunning(false);
+    }
+  }
+
+  async function runComplianceFailure() {
+    setIsRunning(true);
+    setActiveDemo("error");
+    setSignal(null);
+    setRunResult(null);
+    setLogs([{ label: "Compliance", detail: "Testing unverified agent against the Gateway policy", status: "live" }]);
+
+    try {
+      await apiJson<RunResult>("/api/agent/run-signal", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-agent-id": "execution-agent-unverified" },
+        body: JSON.stringify({ market: "BTC-USDC", privacy: privacyMode })
+      });
+    } catch (error) {
+      pushLog("Rejected", error instanceof Error ? error.message : "Agent failed KYB policy", "warn");
     } finally {
       setIsRunning(false);
     }
@@ -148,10 +189,13 @@ function App() {
             </p>
             <div className="hero-actions">
               <button onClick={runPaymentFlow} disabled={isRunning}>
-                <Play size={18} /> {isRunning ? "Running flow" : "Run demo flow"}
+                <Play size={18} /> {isRunning ? "Running flow" : "Run judge demo"}
               </button>
               <button className="ghost-button" onClick={() => setPrivacyMode((current) => !current)} type="button">
                 <EyeOff size={18} /> Privacy {privacyMode ? "on" : "off"}
+              </button>
+              <button className="ghost-button" onClick={runComplianceFailure} disabled={isRunning} type="button">
+                <ShieldCheck size={18} /> Reject agent
               </button>
               <a href="#architecture">View system <ArrowRight size={16} /></a>
             </div>
@@ -183,6 +227,21 @@ function App() {
         ))}
       </section>
 
+      <section className="judge-section reveal">
+        <div className="judge-copy">
+          <p className="eyebrow">Judge mode</p>
+          <h2>One click shows every required primitive.</h2>
+          <p>
+            The demo exposes the invisible machine-payment path as receipts: compliance decision, invoice hash, funding path, paymaster UserOp, settlement tx, and privacy proof.
+          </p>
+        </div>
+        <div className="mode-card">
+          <span>Mode</span>
+          <strong>{import.meta.env.VITE_GATEWAY_URL ? "External Gateway" : "Vercel Serverless Mock"}</strong>
+          <p>{activeDemo === "complete" ? "Signal unlocked" : activeDemo === "error" ? "Policy failure shown" : activeDemo === "running" ? "Agent running" : "Ready"}</p>
+        </div>
+      </section>
+
       <section id="architecture" className="architecture-section">
         <div className="section-heading reveal">
           <p className="eyebrow">System architecture</p>
@@ -207,6 +266,50 @@ function App() {
               <p>{body as string}</p>
             </article>
           ))}
+        </div>
+        <div className="flow-map reveal">
+          {architectureNodes.map((node) => (
+            <div className={logs.some((log) => log.label === node) ? "active" : ""} key={node}>
+              <span />
+              {node}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="market-section reveal">
+        <div>
+          <p className="eyebrow">Oracle marketplace</p>
+          <h2>The agent chooses paid research by price, conviction, and latency.</h2>
+        </div>
+        <div className="market-table">
+          {oracleMarket.map(([name, price, confidence, latency]) => (
+            <div className={name === "Canteen Alpha Oracle" ? "selected" : ""} key={name}>
+              <strong>{name}</strong>
+              <span>{price}</span>
+              <span>{confidence}</span>
+              <span>{latency}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="policy-section reveal">
+        <div className="policy-card">
+          <p className="eyebrow">Agent policy</p>
+          <h2>Autonomous, but bounded.</h2>
+          <div className="policy-grid">
+            {policyRules.map(([label, value]) => (
+              <div key={label}><span>{label}</span><strong>{value}</strong></div>
+            ))}
+          </div>
+        </div>
+        <div className="research-card">
+          <p className="eyebrow">Canteen feed</p>
+          <h3>Research becomes machine-readable alpha.</h3>
+          <p>Sentiment acceleration, liquidity delta, and funding compression are scored into a conviction-weighted signal package.</p>
+          <div><FileSearch size={18} /> 18 posts parsed</div>
+          <div><TrendingUp size={18} /> 0.87 conviction</div>
         </div>
       </section>
 
@@ -242,6 +345,18 @@ function App() {
               <div>
                 <span>Wallet sig</span>
                 <strong>{runResult.paymentAuth.signaturePreview}</strong>
+              </div>
+              <div>
+                <span>Privacy proof</span>
+                <strong>{shortHash(runResult.proof.privacyProof)}</strong>
+              </div>
+              <div>
+                <span>Settlement tx</span>
+                <strong>{shortHash(runResult.receipt.txHash)}</strong>
+              </div>
+              <div>
+                <span>Mode</span>
+                <strong>{runResult.mode}</strong>
               </div>
             </div>
           )}
@@ -292,6 +407,19 @@ function App() {
           <div><Sparkles size={20} /> {statusCounts.done} completed steps</div>
           <div><Blocks size={20} /> {runResult ? String(runResult.receipt.txHash).slice(0, 18) : "No payment yet"}</div>
           <div><EyeOff size={20} /> {runResult ? shortHash(runResult.proof.privacyProof) : "No proof yet"}</div>
+        </div>
+      </section>
+
+      <section className="economics-section reveal">
+        <div>
+          <p className="eyebrow">Business model</p>
+          <h2>Oracle Agents monetize intelligence per request.</h2>
+        </div>
+        <div className="metrics-strip">
+          <div><span>Signals sold</span><strong>51</strong></div>
+          <div><span>Oracle revenue</span><strong>12.75 USDC</strong></div>
+          <div><span>Avg price</span><strong>0.25 USDC</strong></div>
+          <div><span>Sim PnL</span><strong>+3.8%</strong></div>
         </div>
       </section>
     </main>
