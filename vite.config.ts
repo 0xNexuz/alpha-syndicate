@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      "/api": "http://localhost:8787",
       "/oracle": "http://localhost:8787",
       "/payments": "http://localhost:8787",
       "/agent": "http://localhost:8787"

@@ -73,6 +73,8 @@ const initialLogs: LogEntry[] = [
   { label: "Wallets", detail: "Agent wallets mapped to Arc Testnet and Base Sepolia", status: "idle" }
 ];
 
+const gatewayBaseUrl = import.meta.env.VITE_GATEWAY_URL ?? "";
+
 function App() {
   useScrollReveal();
 
@@ -96,11 +98,11 @@ function App() {
     ]);
 
     try {
-      const result = await fetch("/agent/run-signal", {
+      const result = await apiJson<RunResult>("/api/agent/run-signal", {
         method: "POST",
         headers: { "content-type": "application/json", "x-agent-id": "execution-agent-007" },
         body: JSON.stringify({ market: "BTC-USDC", privacy: privacyMode })
-      }).then((res) => res.json()) as RunResult;
+      });
 
       if (!result.timeline) {
         throw new Error("Agent run failed before returning a timeline.");
@@ -332,6 +334,23 @@ function useScrollReveal() {
 
 function revealDelay(delay: string): CSSProperties {
   return { "--delay": delay } as CSSProperties;
+}
+
+async function apiJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${gatewayBaseUrl}${path}`, init);
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.includes("application/json")) {
+    const text = await response.text();
+    throw new Error(`API returned ${response.status} ${response.statusText}: ${text.slice(0, 120)}`);
+  }
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error((data as { error?: string }).error ?? `API returned ${response.status}`);
+  }
+
+  return data as T;
 }
 
 function shortHash(value: string) {
